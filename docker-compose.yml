@@ -1,0 +1,82 @@
+version: "3.7"
+
+services:
+  app:
+    build: .
+    image: ${APP_NAME}:${APP_VERSION}
+    container_name: ${APP_NAME}
+    env_file: .env
+    restart: always
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    volumes:
+      # - vol:/home/node/api
+      - .:/home/node/api
+    networks:
+      - private-network
+    depends_on:
+      - nginx
+      - redis
+      - mongo
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: redis-${APP_NAME}
+    restart: always
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    volumes:
+      - redis_vol:/data
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+      - REDIS_PASSWORD=${REDIS_PASS}
+    networks:
+      - private-network
+
+  redis_workbench:
+    image: redislabs/redisinsight
+    container_name: redis_workbench-${APP_NAME}
+    restart: always
+    ports:
+      - "${REDIS_WORKBENCH_PORT}:${REDIS_WORKBENCH_PORT}"
+    networks:
+      - private-network
+    depends_on:
+      - redis
+
+  mongo:
+    image: mongo:${MONGO_VERSION}
+    container_name: mongo-${APP_NAME}
+    restart: always
+    ports:
+      - "${MONGO_PORT}:${MONGO_PORT}"
+    volumes:
+      - "mongo_vol:/data/db"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
+    networks:
+      - private-network
+
+  nginx:
+    image: nginx:${NGINX_VERSION}
+    container_name: nginx-${APP_NAME}
+    restart: always
+    ports:
+      - "${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}"
+      - "${NGINX_HTTPS_PORT}:${NGINX_HTTPS_PORT}"
+    volumes:
+      - "nginx_vol:/var/www/html"
+      - "nginx_vol:/var/log/nginx"
+      - "./nginx.conf:/etc/nginx/conf.d/nginx.conf"
+    networks:
+      - private-network
+
+volumes:
+  mongo_vol:
+  redis_vol:
+  nginx_vol:
+
+networks:
+  private-network:
+    driver: bridge
