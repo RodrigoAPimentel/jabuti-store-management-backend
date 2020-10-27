@@ -10,7 +10,6 @@ services:
     ports:
       - "${APP_PORT}:${APP_PORT}"
     volumes:
-      # - vol:/home/node/api
       - .:/home/node/api
     networks:
       - private-network
