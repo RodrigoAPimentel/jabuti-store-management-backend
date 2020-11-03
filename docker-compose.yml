@@ -1,18 +1,19 @@
 version: "3.7"
 
 services:
-  app:
+  api:
     build: .
-    image: ${APP_NAME}:${APP_VERSION}
-    container_name: ${APP_NAME}
+    image: ${API_NAME}:${API_VERSION}
+    container_name: ${API_NAME}
     env_file: .env
     restart: always
     ports:
-      - "${APP_PORT}:${APP_PORT}"
+      - "${API_PORT}:${API_PORT}"
     volumes:
       - .:/home/node/api
     networks:
-      - private-network
+      - api
+      - services
     depends_on:
       - nginx
       - redis
@@ -20,62 +21,73 @@ services:
 
   redis:
     image: redis:${REDIS_VERSION}
-    container_name: redis-${APP_NAME}
+    container_name: redis-${API_NAME}
     restart: always
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
     volumes:
-      - redis_vol:/data
+      - redis:/data
     environment:
       - ALLOW_EMPTY_PASSWORD=no
       - REDIS_PASSWORD=${REDIS_PASS}
     networks:
-      - private-network
+      - services
 
   redis_workbench:
     image: redislabs/redisinsight
-    container_name: redis_workbench-${APP_NAME}
+    container_name: redis_workbench-${API_NAME}
     restart: always
     ports:
       - "${REDIS_WORKBENCH_PORT}:${REDIS_WORKBENCH_PORT}"
     networks:
-      - private-network
+      - services
     depends_on:
       - redis
 
   mongo:
     image: mongo:${MONGO_VERSION}
-    container_name: mongo-${APP_NAME}
+    container_name: mongo-${API_NAME}
     restart: always
     ports:
       - "${MONGO_PORT}:${MONGO_PORT}"
     volumes:
-      - "mongo_vol:/data/db"
+      - "mongo:/data/db"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
     networks:
-      - private-network
+      - services
 
   nginx:
     image: nginx:${NGINX_VERSION}
-    container_name: nginx-${APP_NAME}
+    container_name: nginx-${API_NAME}
     restart: always
     ports:
       - "${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}"
       - "${NGINX_HTTPS_PORT}:${NGINX_HTTPS_PORT}"
     volumes:
-      - "nginx_vol:/var/www/html"
-      - "nginx_vol:/var/log/nginx"
+      - "nginx:/var/www/html"
+      - "nginx:/var/log/nginx"
       - "./nginx.conf:/etc/nginx/conf.d/nginx.conf"
     networks:
-      - private-network
+      - jsm
+      - api
 
 volumes:
-  mongo_vol:
-  redis_vol:
-  nginx_vol:
+  mongo:
+    name: mongo
+  redis:
+    name: redis
+  nginx:
+    name: nginx
 
 networks:
-  private-network:
+  jsm:
+    name: jsm
+    driver: bridge
+  api:
+    name: jsm-api
+    driver: bridge
+  services:
+    name: jsm-services
     driver: bridge
