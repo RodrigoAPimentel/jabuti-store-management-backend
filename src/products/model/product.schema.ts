@@ -10,4 +10,5 @@ export const ProductSchema = new mongoose.Schema({
     purchase_price: Number,
     sale_price: Number,
     acitve: Boolean,
+    image: String,
 });

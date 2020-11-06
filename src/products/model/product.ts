@@ -10,4 +10,5 @@ export class Product extends Document {
     purchase_price: number;
     sale_price: number;
     acitve: boolean;
+    image: string;
 }
