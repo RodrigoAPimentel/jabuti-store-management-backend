@@ -6,7 +6,6 @@ export class User extends Document {
     user: string;
     email: string;
     password: string;
-    token: string;
     permission_level: string;
     permission_group: string;
     active: boolean;

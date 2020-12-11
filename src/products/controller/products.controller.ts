@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { Product } from '../model/product';
 import { ProductsService } from '../service/products.service';
 
+import { JWTAuthGuard } from '../../auth/service/jwt-auth.guard';
+
+@UseGuards(JWTAuthGuard)
 @Controller('products')
 export class ProductsController {
     constructor(private productsService: ProductsService) {}

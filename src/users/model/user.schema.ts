@@ -6,7 +6,7 @@ export const UserSchema = new mongoose.Schema({
     user: String,
     email: String,
     password: String,
-    token: String,
+    access_token: String,
     permission_level: String,
     permission_group: String,
     active: Boolean,

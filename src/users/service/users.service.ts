@@ -22,25 +22,14 @@ export class UsersService {
         return await this.userModel.findOne({ user }).exec();
     }
 
-    // async getByUser(user: string): Promise<any> {
-    //     let usr;
-    //     try {
-    //         usr = await this.userModel.findOne({ user }).exec();
-    //         if (usr === null) {
-    //             return 'The User does not exist!';
-    //         } else {
-    //             return usr;
-    //         }
-    //     } catch (error) {
-    //         console.log(error);
-    //         return 'The User does not exist!';
-    //     }
-    // }
-
     async create(user: User): Promise<User> {
         const hashedPassword = await hash(user.password, 8);
+        let codeSequence = await this.userModel.countDocuments();
+        codeSequence++;
 
         user.password = hashedPassword;
+        user.code = codeSequence.toString();
+        user.active = true;
 
         const userCreated = new this.userModel(user);
         return await userCreated.save();
